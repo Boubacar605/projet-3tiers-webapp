@@ -9,11 +9,11 @@ jobs:
     runs-on: [self-hosted, Linux, X64]
 
     steps:
-      # Récupérer le code
+      # 1. Récupérer le code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Installer oc (si pas déjà installé sur ton PC)
+      # 2. Installer oc si nécessaire
       - name: Install OpenShift CLI
         run: |
           if ! command -v oc &> /dev/null
@@ -25,33 +25,27 @@ jobs:
           fi
           oc version
 
-      # Login OpenShift
+      # 3. Connexion à OpenShift
       - name: Login to OpenShift
         run: |
           oc login --token="${{ secrets.OPENSHIFT_TOKEN }}" --server="${{ secrets.OPENSHIFT_SERVER }}"
           oc whoami
 
-      # Sélection du projet
+      # 4. Sélection du projet
       - name: Set project
         run: oc project boubacar605-dev
 
-      # Lancer la build
+      # 5. Lancer le build
       - name: Start build
         run: |
-          oc start-build webapp
-          echo "Build started"
+          oc start-build webapp --follow
 
-      # Attendre la fin de la build
-      - name: Wait for build
+      # 6. Redéployer (CORRIGÉ)
+      - name: Restart deployment
         run: |
-          oc wait --for=condition=complete build --all -n boubacar605-dev --timeout=300s
+          oc rollout restart deployment webapp
 
-      # Déployer
-      - name: Rollout deployment
-        run: |
-          oc rollout latest dc/webapp -n boubacar605-dev
-
-      # Attendre que le déploiement soit prêt
+      # 7. Attendre que le déploiement soit prêt
       - name: Wait for deployment
         run: |
-          oc rollout status dc/webapp -n boubacar605-dev
+          oc rollout status deployment webapp --timeout=300s
