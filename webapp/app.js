@@ -220,7 +220,7 @@ function renderPage(content, title = 'Gestion de produits') {
 // Routes
 app.get('/', (req, res) => {
   const content = `
-    <h1> Gestion de produits</h1>
+    <h1> Gestion de produits by Bouba</h1>
     <p>Bienvenue sur l'administration de votre boutique en ligne.</p>
     <div style="margin: 2rem 0;">
       <a href="/products" class="btn"> Voir les produits</a>
