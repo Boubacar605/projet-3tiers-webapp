@@ -9,21 +9,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Install oc
         run: |
           curl -LO "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz"
           tar xzf openshift-client-linux.tar.gz
           sudo mv oc /usr/local/bin/
-
       - name: Login to OpenShift
         run: oc login --token=${{ secrets.OPENSHIFT_TOKEN }} --server=${{ secrets.OPENSHIFT_SERVER }}
-
       - name: Start build
-        run: oc start-build webapp -n projet-3tiers
-
+        run: oc start-build webapp -n boubacar605-dev
       - name: Wait for build
-        run: oc wait --for=condition=complete build --all -n projet-3tiers --timeout=300s
-
+        run: oc wait --for=condition=complete build --all -n boubacar605-dev --timeout=300s
       - name: Rollout deployment
-        run: oc rollout latest dc/webapp -n projet-3tiers
+        run: oc rollout latest dc/webapp -n boubacar605-dev

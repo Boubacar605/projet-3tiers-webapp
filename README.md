@@ -1,15 +1,24 @@
-# Projet 3 tiers - Application web
+# OpenShift Clients
 
-Application Node.js de gestion de produits avec base de données MySQL, déployée sur OpenShift.
+The OpenShift client `oc` simplifies working with Kubernetes and OpenShift
+clusters, offering a number of advantages over `kubectl` such as easy login,
+kube config file management, and access to developer tools. The `kubectl`
+binary is included alongside for when strict Kubernetes compliance is necessary.
 
-## Structure
+To learn more about OpenShift, visit [docs.openshift.com](https://docs.openshift.com)
+and select the version of OpenShift you are using.
 
-- `webapp/` : code source de l'application
-- `.github/workflows/deploy.yml` : CI/CD pour déploiement automatique
+## Installing the tools
 
-## Variables d'environnement
+After extracting this archive, move the `oc` and `kubectl` binaries
+to a location on your PATH such as `/usr/local/bin`. Then run:
 
-- `DB_HOST` : nom du service MySQL (défaut : mysql-service)
-- `DB_USER` : utilisateur MySQL (défaut : webuser)
-- `DB_PASSWORD` : mot de passe MySQL (défaut : password)
-- `DB_NAME` : nom de la base (défaut : webapp)
+    oc login [API_URL]
+
+to start a session against an OpenShift cluster. After login, run `oc` and
+`oc help` to learn more about how to get started with OpenShift.
+
+## License
+
+OpenShift is licensed under the Apache Public License 2.0. The source code for this
+program is [located on github](https://github.com/openshift/oc).
