@@ -6,41 +6,52 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64]
+
     steps:
       # Récupérer le code
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      # Installer l'outil oc
-      - name: Install OpenShift CLI (oc)
+      # Installer oc (si pas déjà installé sur ton PC)
+      - name: Install OpenShift CLI
         run: |
-          curl -LO "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz"
-          tar xzf openshift-client-linux.tar.gz
-          sudo mv oc /usr/local/bin/
+          if ! command -v oc &> /dev/null
+          then
+            echo "Installing oc..."
+            curl -LO "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz"
+            tar xzf openshift-client-linux.tar.gz
+            sudo mv oc /usr/local/bin/
+          fi
           oc version
 
-      # Vérifier que les secrets sont bien définis
-      - name: Check OpenShift secrets
-        run: |
-          if [ -z "${{ secrets.OPENSHIFT_SERVER }}" ] || [ -z "${{ secrets.OPENSHIFT_TOKEN }}" ]; then
-            echo "Error: OPENSHIFT_SERVER or OPENSHIFT_TOKEN is empty!"
-            exit 1
-          fi
-
-      # Login à OpenShift (version sûre)
+      # Login OpenShift
       - name: Login to OpenShift
         run: |
           oc login --token="${{ secrets.OPENSHIFT_TOKEN }}" --server="${{ secrets.OPENSHIFT_SERVER }}"
           oc whoami
 
+      # Sélection du projet
+      - name: Set project
+        run: oc project boubacar605-dev
+
       # Lancer la build
-      - name: Start OpenShift build
-        run: oc start-build webapp -n boubacar605-dev
+      - name: Start build
+        run: |
+          oc start-build webapp
+          echo "Build started"
 
       # Attendre la fin de la build
-      - name: Wait for build to complete
-        run: oc wait --for=condition=complete build --all -n boubacar605-dev --timeout=300s
+      - name: Wait for build
+        run: |
+          oc wait --for=condition=complete build --all -n boubacar605-dev --timeout=300s
 
-      # Déployer la dernière version
-      - name: Rollout latest deployment
-        run: oc rollout latest dc/webapp -n boubacar605-dev
+      # Déployer
+      - name: Rollout deployment
+        run: |
+          oc rollout latest dc/webapp -n boubacar605-dev
+
+      # Attendre que le déploiement soit prêt
+      - name: Wait for deployment
+        run: |
+          oc rollout status dc/webapp -n boubacar605-dev
