@@ -1,4 +1,3 @@
-
 name: Deploy to OpenShift
 
 on:
@@ -10,43 +9,34 @@ jobs:
     runs-on: [self-hosted, Linux, X64]
 
     steps:
-      # 1. Récupérer le code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Installer oc si nécessaire
       - name: Install OpenShift CLI
         run: |
           if ! command -v oc &> /dev/null
           then
-            echo "Installing oc..."
             curl -LO "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz"
             tar xzf openshift-client-linux.tar.gz
             sudo mv oc /usr/local/bin/
           fi
-          oc version
 
-      # 3. Connexion à OpenShift
       - name: Login to OpenShift
         run: |
           oc login --token="${{ secrets.OPENSHIFT_TOKEN }}" --server="${{ secrets.OPENSHIFT_SERVER }}"
           oc whoami
 
-      # 4. Sélection du projet
       - name: Set project
         run: oc project boubacar605-dev
 
-      # 5. Lancer le build
       - name: Start build
         run: |
-          oc start-build webapp --follow
+          oc start-build projet-3-tiers-webapp-git --follow
 
-      # 6. Redéployer (CORRIGÉ)
       - name: Restart deployment
         run: |
           oc rollout restart deployment webapp
 
-      # 7. Attendre que le déploiement soit prêt
       - name: Wait for deployment
         run: |
           oc rollout status deployment webapp --timeout=300s
